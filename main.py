@@ -32,14 +32,14 @@ compute_type = "float16"     # Options ['float16', 'int8_float16', 'int8']
 
 # **Video selection** 📺
 
-Type = "Youtube video or playlist"  # Options ['Youtube video or playlist', 'Local', 'Direct download']
+Type = "Direct download"  # Options ['Youtube video or playlist', 'Local', 'Direct download']
 
 # **Youtube video or playlist**
-URL = "https://www.youtube.com/watch?v=MPC-3ENpvFw" 
+URL = "https://www.youtube.com/watch?v=9ez8lm9I26Y" 
 
 
 #  **Local video**
-video_path = "C:/Users/DESKTOP/youtube_transcription/VID-20210607-WA0034.mp4" 
+video_path = "C:/Users/DESKTOP/youtube_transcription/9ez8lm9I26Y.mp3" 
 
 # **Direct Download**
 ddl_url = "https://video-aajtak.tosshub.com/aajtak/video/2024_05/06_may_24_at_nand_gopal_vo_mm_1024_512.mp4" 
@@ -52,13 +52,8 @@ video_path_local_list = []
 if Type == "Youtube video or playlist":
 
     ydl_opts = {
-        'format': 'm4a/bestaudio/best',
+        'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4',
         'outtmpl': '%(id)s.%(ext)s',
-        # ℹ️ See help(yt_dlp.postprocessor) for a list of available Postprocessors and their arguments
-        'postprocessors': [{  # Extract audio using ffmpeg
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-        }]
     }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -66,7 +61,7 @@ if Type == "Youtube video or playlist":
         list_video_info = [ydl.extract_info(URL, download=False)]
 
     for video_info in list_video_info:
-        video_path_local_list.append(Path(f"{video_info['id']}.mp3"))
+        video_path_local_list.append(Path(f"{video_info['id']}.mp4"))
 
 elif Type == "Local":
     video_path = Path(video_path)
@@ -115,6 +110,8 @@ elif Type == "Direct download":
 else:
     raise(TypeError("Please select supported input type."))
 
+
+
 for video_path_local in video_path_local_list:
     valid_suffixes = [".mp4", ".mkv", ".mov", ".avi", ".wmv", ".flv", ".webm", ".3gp", ".mpeg"]
 
@@ -122,8 +119,8 @@ for video_path_local in video_path_local_list:
 
     if video_path_local.suffix in valid_suffixes:
         input_suffix = video_path_local.suffix
-        video_path_local = video_path_local.with_suffix(".wav")
-        result = subprocess.run(["ffmpeg", "-i", str(video_path_local.with_suffix(input_suffix)), "-vn", "-acodec", "pcm_s16le", "-ar", "16000", "-ac", "1", str(video_path_local)])
+        video_path_local = video_path_local.with_suffix(".mp3")
+        result = subprocess.run(["ffmpeg", "-i", str(video_path_local.with_suffix(input_suffix)), "-vn", "-acodec", "libmp3lame", "-q:a", "2", str(video_path_local)])  # Adjusted ffmpeg command for mp3 conversion
 
 def seconds_to_time_format(s):
     # Convert seconds to hours, minutes, seconds, and milliseconds
